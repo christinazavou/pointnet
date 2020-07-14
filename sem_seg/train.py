@@ -2,7 +2,9 @@ import argparse
 import math
 import h5py
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import socket
 
 import os

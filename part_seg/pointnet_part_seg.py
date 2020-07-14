@@ -1,4 +1,6 @@
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import numpy as np
 import math
 import os
@@ -6,7 +8,7 @@ import sys
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(BASE_DIR))
 sys.path.append(os.path.join(BASE_DIR, '../utils'))
-import tf_util
+from utils import tf_util
 
 
 def get_transform_K(inputs, is_training, bn_decay=None, K = 3):
