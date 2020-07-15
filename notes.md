@@ -4,6 +4,7 @@ Questions
 - why the _variable_on_cpu call in variable_with_weight_decay? maybe they specify all variables on cpu so that in case you run on multi gpu it is more efficient to have everything on cpu..(https://stackoverflow.com/questions/34428850/variables-on-cpu-training-gradients-on-gpu)
   check also: https://jhui.github.io/2017/03/07/TensorFlow-GPU/
   depends on hardware configuration...e.g. Tesla K80: If the GPUs are on the same PCI Express and are able to communicate using NVIDIA GPUDirect Peer to Peer, we place the variables equally across the GPUs. Otherwise, we place the variables on the CPU. Titan X, P100: For models like ResNet and InceptionV3, placing variables on the CPU. But for models with a lot of variables like AlexNet and VGG, using GPUs with NCCL is better.
+  - what are second-order optimization methods that attempt to model the curvature of the cost surface?
 
 Interesting
 
@@ -66,7 +67,34 @@ Interesting
   - the conv2d has an arguments strides of shape 1,2,or 4.
   if 4 then it is stride for [N,H,W,C] i.e. stride for batch, height, width and channel. normally you set N to 1 (you don't want to skip any batch otherwise you wouldnt include those data in training) and C to 1 (you don't want to skip data - channel information).
   
-
+  - _**When you have a large dataset it's important to optimize well and not as important to regularize well._** Batch normalization is kind of a regularization technique but is used to improve the performance of backpropagation. It keeps the back propagated gradient from getting too big or too small, by rescaling and recentering. This is useful also for when adding random noise (_**e.g. dropout or bias ?!**_)
+  
+  Batch norm is similar to dropout (can be seen as multiplying each weight with 0 or 1) is the sense that it multiplies each hidden unit by a random value at each step of training. In this case, the random value is the standard deviation of all the hidden units in the minibatch (because different examples are randomly chosen for inclusion in the minibatch at each step, the standard deviation randomly fluctuates). It also subtracts a random value (the mean of the minibatch) from each hidden unit at each step. Both of these sources of noise mean that every layer has to learn to be robust to a lot of variation in its input, just like with dropout.
+  
+  benefits:
+    - train faster (even if training an epoch takes longer ...it will eventually converge faster)
+    - allows higher learning rates (so converges faster)
+    - weight initialization can be difficult but Batch Normalization helps reduce the sensitivity to the initial starting weights.
+    - more activation functions viable
+  
+  Exponentially weighted averages:
+  V_t = βV_(t-1) + (1-β)θ_t
+  where V_t is the expected temperature today and θ_t is the real temperature today
+  so V_t is approximately the average temperature over the previous 1/(1-β) days
+  so e.g. V_100 = 0.9V_99 + 0.1θ_98 = 0.9V_99 + 0.1(0.9θ_98) + 0.1(0.1θ_97) = ... = 0.9V_99 + 0.1(0.9)^2θ_97 0.1*0.1θ_96+ 0.1(0.1)*0.9θ_96+0.1*0.1*0.1*θ_95 .... so the coefficients follow an exponentailly decaying function  
+  Calculating this means just keep one number in memory and keep overwritting it (start with V_0)..so it's efficient!! (in oppose to real average of last days were you keep all days in memory)
+  Note that V_1 is only using V_0 so it's not as good estimation as later estimations like V_10 ... so we need to do: bias correction !
+  
+  Bias correction:
+  multiplying your estimation by 1/(1-β^t) .. so in initial timesteps (1-β^t) is near zero and as t grows it approaches to one.
+  
+  Basically in batch normalization we need mean (activations) of batch and variance (activations) of batch .. and to get them we use exponentially weighted averages!!
+  
+  in tensorflow:
+  ![](batchnorm1.png)
+  
+  - self.x_norm, moving_update = tf.cond(is_training, true_fn=training_fn, false_fn=testing_fn)
+  
 Notes
 
 - TensorFlow variables are used to share and persist some stats that are manipulated by our program. That is, when you define a variable, TensorFlow adds a tf.Operation to your graph. Then, this operation will store a writable tensor value that persists between tf.Session.run calls. So, you can update the value of a variable through each run, while you cannot update tensor (e.g a tensor created by tf.constant()) through multiple runs in a session.
@@ -110,3 +138,26 @@ example snippet:
     config.gpu_options.per_process_gpu_memory_fraction = 0.4
     session = tf.Session(config=config, ...)
     ```
+
+- standardization: transform your data set to have zero mean and unit variance
+
+- normalization: important preprocessing when we deal with parameters of different units and scales. e.g. if we want to use Euclidean distance we need to normalize our points (e.g. into meters) to compare them..
+
+- _**Batch normalization is a technique to provide any layer in a NN with inputs that are zero mean / unit variance**_
+
+- dropout is a regularization technique
+
+- we can achieve batch normalization with 
+    - tf.layers.batch_normalization
+        a trainable layer that learns a function of two parameters (gamma and beta) so that we don't need to standardize its input data :) 
+        ![](batchnorm2.png)
+    - manual backprop ams grad
+
+    feed-forward step:
+        from input x we calculate the mean of every dimension in the feature space and then subtract this vector of mean values from every training example.
+        we also calculate the per-dimension variance 
+        we multiply by gamma and add beta to get the output!
+    backward step:
+        ![](batchnorm3.png)
+        
+        
