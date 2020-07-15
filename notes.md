@@ -5,6 +5,7 @@ Questions
   check also: https://jhui.github.io/2017/03/07/TensorFlow-GPU/
   depends on hardware configuration...e.g. Tesla K80: If the GPUs are on the same PCI Express and are able to communicate using NVIDIA GPUDirect Peer to Peer, we place the variables equally across the GPUs. Otherwise, we place the variables on the CPU. Titan X, P100: For models like ResNet and InceptionV3, placing variables on the CPU. But for models with a lot of variables like AlexNet and VGG, using GPUs with NCCL is better.
   - what are second-order optimization methods that attempt to model the curvature of the cost surface?
+  - in conv2D the num_output_channels is basically the amount of filters ?
 
 Interesting
 
@@ -150,6 +151,7 @@ example snippet:
 - we can achieve batch normalization with 
     - tf.layers.batch_normalization
         a trainable layer that learns a function of two parameters (gamma and beta) so that we don't need to standardize its input data :) 
+        _**so basically is a neural layer with weights and biases that need to be learned..and we learn them with exponential moving average!? (as i understood from https://www.tensorflow.org/api_docs/python/tf/train/ExponentialMovingAverage)**_
         ![](batchnorm2.png)
     - manual backprop ams grad
 
@@ -159,5 +161,9 @@ example snippet:
         we multiply by gamma and add beta to get the output!
     backward step:
         ![](batchnorm3.png)
-        
-        
+
+- tensorflow broadcasting:
+    ![](broadcast.png)
+
+- tf.nn.moments(x, axes, shift=None, keepdims=False, name=None) is to calculate mean and variance
+    
