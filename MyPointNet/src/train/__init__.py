@@ -1,4 +1,4 @@
-from src.io import parse_configuration
+from src.io.config import parse_configuration
 
 
 parse_configuration(argv=['gpu', '4'])

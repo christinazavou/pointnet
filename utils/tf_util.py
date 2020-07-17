@@ -491,6 +491,12 @@ def batch_norm_template(inputs, is_training, scope, moments_dims, bn_decay):
                         mean_var_with_update,
                         lambda: (ema.average(batch_mean), ema.average(batch_var)))
     normed = tf.nn.batch_normalization(inputs, mean, var, beta, gamma, 1e-3)
+    print("scope ", scope)
+    print("inputs.shape ", inputs.get_shape())
+    print("num_channels ", inputs.get_shape()[-1].value)
+    print("moments_dims ", moments_dims)
+    print("batch_mean.shape ", batch_mean.shape)
+    print("batch_var.shape ", batch_var.shape)
   return normed
 
 
