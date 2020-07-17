@@ -4,8 +4,10 @@ Questions
 - why the _variable_on_cpu call in variable_with_weight_decay? maybe they specify all variables on cpu so that in case you run on multi gpu it is more efficient to have everything on cpu..(https://stackoverflow.com/questions/34428850/variables-on-cpu-training-gradients-on-gpu)
   check also: https://jhui.github.io/2017/03/07/TensorFlow-GPU/
   depends on hardware configuration...e.g. Tesla K80: If the GPUs are on the same PCI Express and are able to communicate using NVIDIA GPUDirect Peer to Peer, we place the variables equally across the GPUs. Otherwise, we place the variables on the CPU. Titan X, P100: For models like ResNet and InceptionV3, placing variables on the CPU. But for models with a lot of variables like AlexNet and VGG, using GPUs with NCCL is better.
-  - what are second-order optimization methods that attempt to model the curvature of the cost surface?
-  - in conv2D the num_output_channels is basically the amount of filters ?
+- what are second-order optimization methods that attempt to model the curvature of the cost surface?
+- in conv2D the num_output_channels is basically the amount of filters ?
+- using pointnet_cls_basic...i see in that predictions (pred_val train.py line 205) are of shape batchSize,40 ... so i guess we have 40 categories...which are they ?
+- why do we take the first points as samples of the point cloud ? (line 184 in train.py) is it because anyway points in the cloud are unordered?
 
 Interesting
 
@@ -166,4 +168,5 @@ example snippet:
     ![](broadcast.png)
 
 - tf.nn.moments(x, axes, shift=None, keepdims=False, name=None) is to calculate mean and variance
-    
+
+- to see coverage of unittests: conda install coverage
