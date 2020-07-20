@@ -125,7 +125,7 @@ def train():
             
             # Add ops to save and restore all the variables.
             saver = tf.train.Saver()
-            
+
         # Create a session
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
